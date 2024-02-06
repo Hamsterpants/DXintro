@@ -27,10 +27,10 @@ jobs:
           FROM_COLUMN_ID="${{ github.event.project_card.previous_column_id }}"
           TO_COLUMN_ID="${{ github.event.project_card.column_id }}"
           
-          # Echo the extracted details
-          echo "Issue Number: $ISSUE_NUMBER"
-          echo "From Column ID: $FROM_COLUMN_ID"
-          echo "To Column ID: $TO_COLUMN_ID"
+          # Set the outputs
+          echo "::set-output name=issue-number::$ISSUE_NUMBER"
+          echo "::set-output name=from-column-id::$FROM_COLUMN_ID"
+          echo "::set-output name=to-column-id::$TO_COLUMN_ID"
 
       - name: Log moved issue details
         run: |
