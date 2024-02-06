@@ -2,8 +2,7 @@ name: Log Moved Issue Details
 
 on:
   project_card:
-    types:
-      - moved
+    types: [created, deleted, moved, converted, deleted]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
