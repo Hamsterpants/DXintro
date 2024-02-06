@@ -1,22 +1,19 @@
 name: Issue Move Detector
 
 on:
-  project_card:
+  projects_v2_item:
     types: [moved]
 
 jobs:
   issue-move:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Echo issue move details
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ISSUE_NUMBER=$(echo "${{ github.event.project_card.content_url }}" | awk -F '/' '{print $NF}')
-          OLD_COLUMN=$(echo "${{ github.event.changes.column_id.from }}" | jq -r '.name')
-          NEW_COLUMN=$(echo "${{ github.event.changes.column_id.to }}" | jq -r '.name')
+          ISSUE_NUMBER=$(echo "${{ github.event.project_item.content_url }}" | awk -F '/' '{print $NF}')
+          OLD_COLUMN=$(echo "${{ github.event.project_item.old.column_name }}" | sed 's/"//g')
+          NEW_COLUMN=$(echo "${{ github.event.project_item.new.column_name }}" | sed 's/"//g')
           
           echo "Issue #$ISSUE_NUMBER was moved from column '$OLD_COLUMN' to column '$NEW_COLUMN'."
