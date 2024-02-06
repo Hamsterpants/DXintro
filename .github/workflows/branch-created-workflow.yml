@@ -18,7 +18,7 @@ jobs:
           BRANCH_NAME="${{ github.ref }}"
           ISSUE_NUMBER=$(echo $BRANCH_NAME | grep -o -E '#[0-9]+' | tr -d '#')
           USER_LOGIN=$(echo $BRANCH_NAME | cut -d'-' -f2)
-          COLUMN_ID="<IN_PROGRESS_COLUMN_ID>"
+          COLUMN_ID="47fc9ee4"
 
           # Assign the issue to the user
           curl -X POST \
