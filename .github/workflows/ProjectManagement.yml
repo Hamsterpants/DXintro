@@ -1,39 +1,53 @@
-name: Log Moved Issue Details
+name: Assign and Move Issue on Branch Creation
 
 on:
-  project_column:
+  create:
     types:
-      - moved
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-permissions:
-  checks: write
-  actions: write
-  contents: write
-  issues: write
+      - branch
 
 jobs:
-  log-details:
+  assign_and_move_issue:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Extract issue details
-        id: extract-details
+      - name: Get issue associated with branch
+        id: get_issue
         run: |
-          COLUMN_ID="${{ github.event.project_column.id }}"
-          CONTENT_URL="${{ github.event.project_column.resource_url }}"
-          
-          # Extract the issue number from the content URL
-          ISSUE_NUMBER=$(echo $CONTENT_URL | awk -F '/' '{print $NF}')
-          
-          # Echo the extracted details
-          echo "Issue Number: $ISSUE_NUMBER"
-          echo "Column ID: $COLUMN_ID"
+          BRANCH_NAME="${{ github.ref }}"
+          ISSUE_NUMBER=$(echo $BRANCH_NAME | sed 's/\//-/g') # Assuming branch name is in the format issue/123
+          echo "::set-output name=issue_number::$ISSUE_NUMBER"
 
-      - name: Log moved issue details
-        run: |
-          echo "The issue ${{ steps.extract-details.outputs.issue-number }} was moved to column ${{ steps.extract-details.outputs.column-id }}"
+      - name: Update issue status and assignee
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = process.env.ISSUE_NUMBER;
+            const assignee = context.actor;
+            
+            // Update issue status to "In Progress"
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              state: 'open'
+            });
+
+            // Add "In Progress" label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: ['In Progress'] // Replace with your desired label name
+            });
+
+            // Assign the branch creator to the issue
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              assignees: [assignee]
+            });
+            
