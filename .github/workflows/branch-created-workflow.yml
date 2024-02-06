@@ -1,42 +1,12 @@
-name: Assign Creator and Move to In Progress
+name: Branch Creation Workflow
 
 on:
   create:
     types: [branch]
 
 jobs:
-  update-issue:
+  log-branch-name:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Assign issue and move to in progress
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH_NAME="${{ github.ref }}"
-          ISSUE_NUMBER=$(echo $BRANCH_NAME | grep -o -E '#[0-9]+' | tr -d '#')
-          USER_LOGIN=$(echo $BRANCH_NAME | cut -d'-' -f2)
-          COLUMN_ID="47fc9ee4"
-
-          # Assign the issue to the user
-          curl -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER/assignees \
-            -d '{"assignees": ["'$USER_LOGIN'"]}'
-
-          # Find the ID of the "In Progress" column
-          IN_PROGRESS_COLUMN_RESPONSE=$(curl -s -X GET \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/projects/columns | jq ".[] | select(.name == \"In Progress\")")
-          IN_PROGRESS_COLUMN_ID=$(echo $IN_PROGRESS_COLUMN_RESPONSE | jq '.id')
-
-          # Move the issue to the "In Progress" column
-          curl -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/projects/columns/$IN_PROGRESS_COLUMN_ID/cards \
-            -d '{"content_type": "Issue", "content_id": '$ISSUE_NUMBER'}'
+      - name: Log branch name
+        run: echo "Branch ${GITHUB_REF#refs/heads/} was created."
