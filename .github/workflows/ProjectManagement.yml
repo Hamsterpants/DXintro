@@ -1,53 +1,22 @@
-name: Assign and Move Issue on Branch Creation
+name: Issue Move Detector
 
 on:
-  create:
-    types:
-      - branch
+  project_card:
+    types: [moved]
 
 jobs:
-  assign_and_move_issue:
+  issue-move:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Get issue associated with branch
-        id: get_issue
+      - name: Echo issue move details
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH_NAME="${{ github.ref }}"
-          ISSUE_NUMBER=$(echo $BRANCH_NAME | sed 's/\//-/g') # Assuming branch name is in the format issue/123
-          echo "::set-output name=issue_number::$ISSUE_NUMBER"
-
-      - name: Update issue status and assignee
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issueNumber = process.env.ISSUE_NUMBER;
-            const assignee = context.actor;
-            
-            // Update issue status to "In Progress"
-            await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              state: 'open'
-            });
-
-            // Add "In Progress" label
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              labels: ['In Progress'] // Replace with your desired label name
-            });
-
-            // Assign the branch creator to the issue
-            await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              assignees: [assignee]
-            });
-            
+          ISSUE_NUMBER=$(echo "${{ github.event.project_card.content_url }}" | awk -F '/' '{print $NF}')
+          OLD_COLUMN=$(echo "${{ github.event.changes.column_id.from }}" | jq -r '.name')
+          NEW_COLUMN=$(echo "${{ github.event.changes.column_id.to }}" | jq -r '.name')
+          
+          echo "Issue #$ISSUE_NUMBER was moved from column '$OLD_COLUMN' to column '$NEW_COLUMN'."
