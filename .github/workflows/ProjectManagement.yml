@@ -2,7 +2,8 @@ name: Log Moved Issue Details
 
 on:
   project_card:
-    types: [created, deleted, moved, converted, deleted]
+    types:
+      - moved
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Extract issue details
         id: extract-details
@@ -27,7 +28,7 @@ jobs:
           FROM_COLUMN_ID="${{ github.event.project_card.previous_column_id }}"
           TO_COLUMN_ID="${{ github.event.project_card.column_id }}"
           
-          # Set the outputs
+          # Set the outputs for later steps
           echo "::set-output name=issue-number::$ISSUE_NUMBER"
           echo "::set-output name=from-column-id::$FROM_COLUMN_ID"
           echo "::set-output name=to-column-id::$TO_COLUMN_ID"
