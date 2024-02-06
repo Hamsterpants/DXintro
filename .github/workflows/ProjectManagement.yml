@@ -1,10 +1,9 @@
 name: Log Moved Issue Details
 
 on:
-  project_card:
-    types: [created, moved, converted, edited, deleted]
   project_column:
-    types: [created, moved, updated, deleted]
+    types:
+      - moved
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,15 +24,16 @@ jobs:
       - name: Extract issue details
         id: extract-details
         run: |
-          ISSUE_NUMBER="${{ github.event.project_card.content_url }}"
-          FROM_COLUMN_ID="${{ github.event.project_card.previous_column_id }}"
-          TO_COLUMN_ID="${{ github.event.project_card.column_id }}"
+          COLUMN_ID="${{ github.event.project_column.id }}"
+          CONTENT_URL="${{ github.event.project_column.resource_url }}"
           
-          # Set the outputs for later steps
-          echo "::set-output name=issue-number::$ISSUE_NUMBER"
-          echo "::set-output name=from-column-id::$FROM_COLUMN_ID"
-          echo "::set-output name=to-column-id::$TO_COLUMN_ID"
+          # Extract the issue number from the content URL
+          ISSUE_NUMBER=$(echo $CONTENT_URL | awk -F '/' '{print $NF}')
+          
+          # Echo the extracted details
+          echo "Issue Number: $ISSUE_NUMBER"
+          echo "Column ID: $COLUMN_ID"
 
       - name: Log moved issue details
         run: |
-          echo "The issue ${{ steps.extract-details.outputs.issue-number }} was moved from column ${{ steps.extract-details.outputs.from-column-id }} to column ${{ steps.extract-details.outputs.to-column-id }}"
+          echo "The issue ${{ steps.extract-details.outputs.issue-number }} was moved to column ${{ steps.extract-details.outputs.column-id }}"
