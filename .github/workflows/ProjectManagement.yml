@@ -1,7 +1,7 @@
 name: Issue Move Detector
 
 on:
-  projects_v2_item:
+  project_card:
     types: [moved]
 
 jobs:
@@ -12,8 +12,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ISSUE_NUMBER=$(echo "${{ github.event.project_item.content_url }}" | awk -F '/' '{print $NF}')
-          OLD_COLUMN=$(echo "${{ github.event.project_item.old.column_name }}" | sed 's/"//g')
-          NEW_COLUMN=$(echo "${{ github.event.project_item.new.column_name }}" | sed 's/"//g')
+          CARD_CONTENT_URL=${{ github.event.project_card.content_url }}
+          ISSUE_NUMBER=$(echo $CARD_CONTENT_URL | cut -d '/' -f  6)
+          OLD_COLUMN=${{ github.event.changes.column_id.from }}
+          NEW_COLUMN=${{ github.event.changes.column_id.to }}
           
           echo "Issue #$ISSUE_NUMBER was moved from column '$OLD_COLUMN' to column '$NEW_COLUMN'."
