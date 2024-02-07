@@ -1,9 +1,12 @@
 name: Assign Branch Creator to Issue
 
 on:
-  push:
-    branches:
-      - '**'
+  create:
+    branches-ignore:
+      - 'main'
+      - 'master'
+      - 'develop'
+      
 
 jobs:
   assign-creator:
