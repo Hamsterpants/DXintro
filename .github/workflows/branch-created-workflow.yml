@@ -1,12 +1,8 @@
 name: Branch Creation Workflow
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - 'feat/**'
-      - 'main'
-
+    # This will match any push events, including the creation of new branches
 jobs:
   log-branch-name:
     runs-on: ubuntu-latest
