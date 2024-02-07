@@ -11,6 +11,9 @@ jobs:
   label-issue:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Extract issue number from branch name
         id: extract-issue
         run: |
