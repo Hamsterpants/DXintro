@@ -3,25 +3,24 @@ name: Move Issue to In Progress
 on:
   push:
     branches:
-      - '**' # This triggers the workflow for all branches
+      - '**'
 
 jobs:
   move-issue:
     runs-on: ubuntu-latest
     steps:
       - name: Extract issue number from branch name
-        id: extract_issue
-        run: echo "::set-output name=ISSUE_NUMBER::$(echo $GITHUB_REF | grep -oE '[0-9]+')"
+        run: echo "ISSUE_NUMBER=$(echo $GITHUB_REF | grep -oE '[0-9]+')" >> $GITHUB_ENV
         env:
           GITHUB_REF: ${{ github.ref }}
 
       - name: Move issue to In Progress
-        uses: actions/github-script@v5
+        uses: actions/github-script@v5 # Ensure this is the latest version or one that supports Node.js 20
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const issueNumber = ${{ steps.extract_issue.outputs.ISSUE_NUMBER }};
-            const state = "In Progress"; // Adjust this based on your project's labels or workflow
+            const issueNumber = process.env.ISSUE_NUMBER;
+            const state = "In Progress"; // Adjust based on your project's labels or workflow
             github.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
