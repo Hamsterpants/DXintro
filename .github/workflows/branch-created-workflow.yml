@@ -1,8 +1,11 @@
 name: Branch Creation Workflow
 
 on:
-  branch_protection_rule:
-    types: [created]
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feat/**'
+      - 'main'
 
 jobs:
   log-branch-name:
