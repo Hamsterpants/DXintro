@@ -1,8 +1,8 @@
 name: Branch Creation Workflow
 
 on:
-  create:
-    types: [branch]
+  branch_protection_rule:
+    types: [created]
 
 jobs:
   log-branch-name:
